@@ -1,4 +1,9 @@
 # Beacon-Flask
+
+![](https://img.shields.io/badge/Python-3.6.0-blue.svg)
+![](https://img.shields.io/badge/Flask-0.12.2-blue.svg)
+![](https://img.shields.io/badge/license-GPL-blue.svg)
+
 The production of Echo team in the Best Developer Competition of iQiYi. 
 
 ## GNU General Public License v3.0
