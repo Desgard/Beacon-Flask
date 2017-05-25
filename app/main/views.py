@@ -2,6 +2,9 @@ from flask import render_template, jsonify, request
 from . import main
 from app.main.params import public_params
 
+from app import models
+from app import db
+
 import requests
 
 root_uri = 'http://iface.qiyi.com/openapi/'
@@ -52,7 +55,10 @@ def top_five():
 
 @main.route('/beacon/v2/update_cache', methods = ['GET'])
 def update_cache():
+    return ''
 
+@main.route('/beacon/v2/add_uuid', methods = ['GET'])
+def add_user():
     return ''
 
 @main.app_errorhandler(404)

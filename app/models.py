@@ -1,11 +1,43 @@
 from flask import Flask, current_app
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 from app import db
+
+UserVideoRelation = db.Table('UserVideoRelation',
+    db.Column('videos_id', db.Integer, db.ForeignKey('Videos.id')),
+    db.Column('users_id', db.Integer, db.ForeignKey('Users.id'))
+)
+
+class Users(db.Model):
+    __tablename__ = 'Users'
+    id = db.Column(db.Integer, primary_key = True)
+    uuid = db.Column(db.String(20), index = True)
+
+    def __init__(self, uuid = ''):
+        self.uuid = uuid
+
+    like_videos = db.relationship('Videos',
+                                  secondary = UserVideoRelation,
+                                  backref = db.backref('Users', lazy = 'dynamic'))
+    def __repr__(self):
+        return '<User id: %d, uuid: %r>' % (self.id, self.uuid)
+
+class Histories(db.Model):
+    __tablename__ = 'Histories'
+    id = db.Column(db.Integer, primary_key = True)
+    video_id = db.Column(db.Integer)
+    watch_date = db.Column(db.DateTime, default = datetime.now)
+    user_id = db.Column(db.Integer, index = True)
+
+    def __init__(self, video_id = -1, watch_date = datetime.now, user_id = -1):
+        self.video_id = video_id
+        self.watch_date = datetime.now
+        self.user_id = user_id
 
 class Types(db.Model):
     __tablename__ = 'Types'
     id = db.Column(db.Integer, primary_key = True)
-    type_id = db.Column(db.Integer, unique = True, index = True)
+    type_id = db.Column(db.Integer, index = True)
     desc = db.Column(db.String(30))
     name = db.Column(db.String(30))
 
@@ -17,10 +49,17 @@ class Types(db.Model):
     def __repr__(self):
         return '<Type %d: %r>' % (self.type_id, self.name)
 
+    def toDict(self):
+        res = dict()
+        res['id'] = self.type_id
+        res['desc'] = self.desc
+        res['name'] = self.name
+        return res
+
 class Videos(db.Model):
     __tablename__ = 'Videos'
     id = db.Column(db.Integer, primary_key = True)
-    video_id = db.Colmn(db.String(20), unique = True, index = True)
+    video_id = db.Column(db.String(20), unique = True, index = True)
     title = db.Column(db.String(50))
     short_title = db.Column(db.String(50))
     img = db.Column(db.String(1000))
@@ -42,7 +81,7 @@ class Videos(db.Model):
         self.video_id = video_id
         self.title = title
         self.short_title = short_title
-        self.img = img
+        self.img = str(img)
         self.sns_score = sns_score
         self.play_count = play_count
         self.play_count_text = play_count_text
@@ -58,3 +97,23 @@ class Videos(db.Model):
 
     def __repr__(self):
         return '<Video %d: %r>' % (self.video_id, self.title)
+
+    def toDict(self):
+        res = dict()
+        res['id'] = self.video_id
+        res['title'] = self.title
+        res['short_title'] = self.short_title
+        res['img'] = self.img
+        res['sns_score'] = self.sns_score
+        res['play_count'] = self.play_count
+        res['play_count_text'] = self.play_count_text
+        res['a_id'] = self.a_id
+        res['tv_id'] = self.tv_id
+        res['is_vip'] = self.is_vip
+        res['type'] = self.type
+        res['p_type'] = self.p_type
+        res['date_timestamp'] = self.date_timestamp
+        res['date_format'] = self.date_format
+        res['total_num'] = self.total_num
+        res['update_num'] = self.update_num
+        return res
