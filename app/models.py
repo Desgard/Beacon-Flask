@@ -29,9 +29,9 @@ class Histories(db.Model):
     watch_date = db.Column(db.DateTime, default = datetime.now)
     user_id = db.Column(db.Integer, index = True)
 
-    def __init__(self, video_id = -1, watch_date = datetime.now, user_id = -1):
+    def __init__(self, video_id = -1, user_id = -1):
         self.video_id = video_id
-        self.watch_date = datetime.now
+        self.watch_date = datetime.now()
         self.user_id = user_id
 
 class Types(db.Model):
@@ -96,7 +96,7 @@ class Videos(db.Model):
         self.update_num = update_num
 
     def __repr__(self):
-        return '<Video %d: %r>' % (self.video_id, self.title)
+        return '<Video %r: %r>' % (self.video_id, self.title)
 
     def toDict(self):
         res = dict()

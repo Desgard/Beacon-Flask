@@ -1,3 +1,4 @@
+from app import models
 
 public_params = {
     'app_k': 'f0f6c3ee5709615310c0f053dc9c65f2',
@@ -18,3 +19,15 @@ public_params = {
     'req_sn': 1493946331320,
     'req_times': 1,
 }
+
+def is_have_user(uuid):
+    search_res = models.Users.query.filter_by(uuid=str(uuid)).count()
+    if search_res == 0:
+        return False
+    else:
+        return True
+
+def get_user_id(uuid):
+    if is_have_user(uuid):
+        user = models.Users.query.filter_by(uuid = str(uuid)).first()
+        return user.id

@@ -3,7 +3,7 @@ import os
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 class config:
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'this is a secret string'
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'Beacon'
     SQLALCHEMY_TRACK_MODIFICATIONS = True
 
     @staticmethod
