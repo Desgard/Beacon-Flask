@@ -1,10 +1,12 @@
 from flask import render_template, jsonify, request
 from . import main
-from app.main.params import public_params, get_user_id, is_have_user
+from app.main.params import public_params, get_user_id, is_have_user, write_video_to_db
 
 from app import models, db
 from datetime import datetime
 
+
+import random
 import requests
 
 root_uri = 'http://iface.qiyi.com/openapi/'
@@ -38,20 +40,41 @@ def get_types():
 
 @main.route('/beacon/v2/top5', methods = ['GET', 'POST'])
 def top_five():
+    url = root_uri + 'batch/recommend'
     if request.method == 'GET':
-        print('GET')
+        params = {
+            'psp_uid': 1,
+        }
+        params.update(public_params)
+        r = requests.get(url, params = params)
+        if r.status_code == 200:
+            res = []
+            data = r.json()['data']
+            print(data)
+            for i in range(0, 5):
+                video_list = data[i]['video_list']
+                index = random.randint(0, 4)
+                write_video_to_db(video_list[index])
+                res.append(video_list[index])
 
-    return jsonify({
-        "msg": "today_top_5_filems",
-        "code": 200,
-        "datas": [
-            "file1",
-            "file2",
-            "file3",
-            "file4",
-            "file5",
-        ],
-    })
+            return jsonify({
+                'msg': 'get_top_5_everyday',
+                'code': 200,
+                'datas': res,
+            })
+
+    elif request.method == 'POST':
+        return jsonify({
+            "msg": "today_top_5_filems",
+            "code": 200,
+            "datas": [
+                "file1",
+                "file2",
+                "file3",
+                "file4",
+                "file5",
+            ],
+        })
 
 @main.route('/beacon/v2/add_like_video', methods = ['POST'])
 def add_like_video():
@@ -61,7 +84,7 @@ def add_like_video():
     if is_have_user(uuid) is False:
         return jsonify({
             'msg': 'user_already_exists',
-            'code': '206',
+            'code': 206,
         })
     userItem = models.Users.query.filter_by(uuid = uuid).first()
     vidoeItem = models.Videos.query.filter_by(movie_id = video_id).first()
@@ -69,15 +92,33 @@ def add_like_video():
     if vidoeItem is None or userItem is None:
         return jsonify({
             'msg': 'data_invalid',
-            'code': '205',
+            'code': 205,
         })
 
     userItem.like_videos.append(vidoeItem)
     db.session.add(userItem)
     db.session.commit()
     return jsonify({
-        'msg': 'add_success',
-        'code': '200',
+        'msg': 'add_like_success',
+        'code': 200,
+    })
+
+@main.route('/beacon/v2/get_like_video/<uuid>', methods = ['GET'])
+def get_like_video(uuid):
+    if is_have_user(uuid) is False:
+        return jsonify({
+            'msg': 'user_not_exists',
+            'code': 206,
+        })
+    user = models.Users.query.filter_by(uuid = uuid).first()
+    videos = user.like_videos
+    res = []
+    for video in videos:
+        res.append(video.toDict())
+    return jsonify({
+        'msg': 'get_all_like_videos',
+        'code': 200,
+        'data': res,
     })
 
 
@@ -89,8 +130,8 @@ def add_play_history():
     # TODO: 对格式进行检测
     if is_have_user(uuid) is False:
         return jsonify({
-            'msg': 'user_already_exists',
-            'code': '206',
+            'msg': 'user_not_exists',
+            'code': 206,
         })
 
     user_id = get_user_id(uuid)
@@ -101,7 +142,7 @@ def add_play_history():
         db.session.commit()
         return jsonify({
             'msg': 'add_history_item',
-            'code': '200'
+            'code': 200
         })
     else:
         item.watch_date = datetime.now()
@@ -109,8 +150,9 @@ def add_play_history():
         db.session.commit()
         return jsonify({
             'msg': 'record_success',
-            'code': '200',
+            'code': 200,
         })
+
 
 @main.route('/beacon/v2/add_uuid/<uuid>', methods = ['GET'])
 def add_user(uuid):

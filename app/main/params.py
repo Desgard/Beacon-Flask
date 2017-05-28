@@ -1,4 +1,4 @@
-from app import models
+from app import models, db
 
 public_params = {
     'app_k': 'f0f6c3ee5709615310c0f053dc9c65f2',
@@ -27,7 +27,41 @@ def is_have_user(uuid):
     else:
         return True
 
+def is_have_video(id):
+    search_res = models.Videos.query.filter_by(video_id=str(id)).count()
+    if search_res == 0:
+        return False
+    else:
+        return True
+
 def get_user_id(uuid):
     if is_have_user(uuid):
         user = models.Users.query.filter_by(uuid = str(uuid)).first()
         return user.id
+
+def write_video_to_db(video):
+    video_id = video['id']
+    if is_have_video(video_id):
+        return False
+
+    db_video = models.Videos(video_id = video['id'],
+                             title=video['title'],
+                             short_title=video['short_title'],
+                             img=video['img'],
+                             sns_score=video['sns_score'],
+                             play_count=video['play_count'],
+                             play_count_text=video['play_count_text'],
+                             a_id=video['a_id'],
+                             tv_id=video['tv_id'],
+                             is_vip=video['is_vip'],
+                             type=video['type'],
+                             p_type=video['p_type'],
+                             date_timestamp=video['date_timestamp'],
+                             date_format=video['date_format'],
+                             total_num=video['total_num'],
+                             update_num=video['update_num'])
+
+    db.session.add(db_video)
+    db.session.commit()
+    return True
+
