@@ -4,6 +4,7 @@ from app.main.params import public_params, get_user_id, is_have_user, write_vide
 
 from app import models, db
 from datetime import datetime
+from sqlalchemy import desc
 
 
 import random
@@ -175,8 +176,7 @@ def add_play_history():
             'code': 206,
         })
 
-    user_id = get_user_id(uuid)
-    item = models.Histories.query.filter_by(video_id = video, user_id = user_id).first()
+    item = models.Histories.query.filter_by(video_id = video, user_id = uuid).first()
     if item == None:
         history_item = models.Histories(video_id = video, user_id = uuid)
         db.session.add(history_item)
@@ -194,6 +194,23 @@ def add_play_history():
             'code': 200,
         })
 
+
+@main.route('/beacon/v2/get_play_history/<uuid>', methods = ['GET'])
+def get_play_history(uuid):
+    if is_have_user(uuid) is False:
+        return jsonify({
+            'msg': 'user_not_exists',
+            'code': 206
+        })
+    histories = models.Histories.query.order_by(desc(models.Histories.watch_date)).all()
+    res = []
+    for history in histories:
+        res.append(history.toDict())
+    return jsonify({
+        'msg': 'get_all_histories',
+        'code': 200,
+        'data': res,
+    })
 
 @main.route('/beacon/v2/add_uuid/<uuid>', methods = ['GET'])
 def add_user(uuid):

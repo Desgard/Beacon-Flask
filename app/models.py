@@ -34,6 +34,13 @@ class Histories(db.Model):
         self.watch_date = datetime.now()
         self.user_id = user_id
 
+    def toDict(self):
+        res = dict()
+        res['video_id'] = self.video_id
+        res['watch_date'] = self.watch_date
+        res['user_id'] = self.user_id
+        return res
+
 class Types(db.Model):
     __tablename__ = 'Types'
     id = db.Column(db.Integer, primary_key = True)
