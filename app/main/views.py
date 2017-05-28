@@ -1,6 +1,6 @@
 from flask import render_template, jsonify, request
 from . import main
-from app.main.params import public_params, get_user_id, is_have_user, write_video_to_db
+from app.main.params import public_params, get_user_id, is_have_user, write_video_to_db, get_write_video_to_db
 
 from app import models, db
 from datetime import datetime
@@ -40,8 +40,8 @@ def get_types():
 
 @main.route('/beacon/v2/top5', methods = ['GET', 'POST'])
 def top_five():
-    url = root_uri + 'batch/recommend'
     if request.method == 'GET':
+        url = root_uri + 'batch/recommend'
         params = {
             'psp_uid': 1,
         }
@@ -50,7 +50,6 @@ def top_five():
         if r.status_code == 200:
             res = []
             data = r.json()['data']
-            print(data)
             for i in range(0, 5):
                 video_list = data[i]['video_list']
                 index = random.randint(0, 4)
@@ -62,18 +61,60 @@ def top_five():
                 'code': 200,
                 'datas': res,
             })
+        else:
+            return jsonify({
+                'msg': 'network_error',
+                'code': 210,
+                'datas': [],
+            })
 
     elif request.method == 'POST':
+        url = root_uri + 'batch/channel'
+        types = request.json['types']
+        if len(types) > 0:
+            res = []
+            for type in types:
+                params = {
+                    'type': 'detail',
+                    'channel_name': str(type),
+                    'page_size': 4,
+                    'version': 7.5,
+                }
+                params.update(public_params)
+                r = requests.get(url, params = params)
+                videos = r.json()['data']['video_list']
+                # print(videos)
+                aVideo = get_write_video_to_db(videos, len(videos) - 1)
+                if aVideo is None:
+                    return jsonify({
+                        'msg': 'data_invalid',
+                        'code': 206,
+                    })
+                res.append(aVideo.toDict())
+                if len(res) == 5:
+                    break
+
+        if len(res) < 5:
+            need_num = 5 - len(res)
+            url = root_uri + 'batch/recommend'
+            params = {
+                'psp_uid': 1,
+            }
+            params.update(public_params)
+            r = requests.get(url, params = params)
+            if r.status_code is 200:
+                data = r.json()['data']
+                for i in range(0, need_num):
+                    video_list = data[i]['video_list']
+                    index = random.randint(0, 4)
+                    write_video_to_db(video_list[index])
+                    res.append(video_list[index])
+
+
         return jsonify({
             "msg": "today_top_5_filems",
             "code": 200,
-            "datas": [
-                "file1",
-                "file2",
-                "file3",
-                "file4",
-                "file5",
-            ],
+            "datas": res,
         })
 
 @main.route('/beacon/v2/add_like_video', methods = ['POST'])

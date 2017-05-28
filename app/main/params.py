@@ -65,3 +65,30 @@ def write_video_to_db(video):
     db.session.commit()
     return True
 
+def get_write_video_to_db(videosDic, index):
+    if index > len(videosDic):
+        return None
+    video = videosDic[index]
+    db_video = models.Videos(video_id = video['id'],
+                             title=video['title'],
+                             short_title=video['short_title'],
+                             img=video['img'],
+                             sns_score=video['sns_score'],
+                             play_count=video['play_count'],
+                             play_count_text=video['play_count_text'],
+                             a_id=video['a_id'],
+                             tv_id=video['tv_id'],
+                             is_vip=video['is_vip'],
+                             type=video['type'],
+                             p_type=video['p_type'],
+                             date_timestamp=video['date_timestamp'],
+                             date_format=video['date_format'],
+                             total_num=video['total_num'],
+                             update_num=video['update_num'])
+    isHave = models.Videos.query.filter_by(video_id = db_video.video_id).count()
+    if isHave is 0:
+        db.session.add(db_video)
+        db.session.commit()
+    return db_video
+
+
