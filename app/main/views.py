@@ -125,7 +125,7 @@ def add_like_video():
 
     if is_have_user(uuid) is False:
         return jsonify({
-            'msg': 'user_already_exists',
+            'msg': 'user_not_exists',
             'code': 206,
         })
     userItem = models.Users.query.filter_by(uuid = uuid).first()
