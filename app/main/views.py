@@ -129,7 +129,7 @@ def add_like_video():
             'code': 206,
         })
     userItem = models.Users.query.filter_by(uuid = uuid).first()
-    vidoeItem = models.Videos.query.filter_by(movie_id = video_id).first()
+    vidoeItem = models.Videos.query.filter_by(video_id = video_id).first()
 
     if vidoeItem is None or userItem is None:
         return jsonify({
