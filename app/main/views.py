@@ -124,10 +124,7 @@ def add_like_video():
     video_id = request.json['video_id']
 
     if is_have_user(uuid) is False:
-        return jsonify({
-            'msg': 'user_not_exists',
-            'code': 206,
-        })
+        add_user(uuid)
     userItem = models.Users.query.filter_by(uuid = uuid).first()
     vidoeItem = models.Videos.query.filter_by(video_id = video_id).first()
 
@@ -169,12 +166,8 @@ def add_play_history():
     uuid = request.json['uuid']
     video = request.json['video_id']
 
-    # TODO: 对格式进行检测
     if is_have_user(uuid) is False:
-        return jsonify({
-            'msg': 'user_not_exists',
-            'code': 206,
-        })
+        add_user(uuid)
 
     item = models.Histories.query.filter_by(video_id = video, user_id = uuid).first()
     if item == None:
