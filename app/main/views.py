@@ -46,7 +46,8 @@ def test_top_5():
         res.append(mv[index].toDict())
     print(res)
     return jsonify({
-        'msg': 200,
+        'msg': 'test_for_top5',
+        'code': 200,
         'datas': res,
     })
 
