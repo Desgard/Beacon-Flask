@@ -38,6 +38,17 @@ def get_types():
             'datas': [],
         })
 
+@main.route('/beacon/test/top5', methods = ['GET'])
+def test_top_5():
+    mv = models.Videos.query.all()
+    res = []
+    for index in range(0, 5):
+        res.append(mv[index].toDict())
+    print(res)
+    return jsonify({
+        'msg': 200,
+        'datas': res,
+    })
 
 @main.route('/beacon/v2/top5', methods = ['GET', 'POST'])
 def top_five():
