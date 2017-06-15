@@ -130,6 +130,23 @@ def top_five():
             "datas": res,
         })
 
+@main.route('/beacon/v2/guess_you_like', methods = ['GET'])
+def guess_you_like():
+    videos = models.Videos.query.all()
+    cnt = 0
+    res = []
+    for video in videos:
+        res.append(video.toDict())
+        cnt += 1
+        if cnt is 20:
+            break
+    return jsonify({
+        "msg": "guess_you_like",
+        "count": cnt,
+        "code": 200,
+        "datas": res,
+    })
+
 @main.route('/beacon/v2/add_like_video', methods = ['POST'])
 def add_like_video():
     uuid = request.json['uuid']
@@ -172,6 +189,31 @@ def get_like_video(uuid):
         'data': res,
     })
 
+@main.route('/beacon/v2/del_like_video', methods = ['POST'])
+def del_like_video():
+    uuid = request.json['uuid']
+    video = request.json['video_id']
+    users = models.Users.query.filter_by(uuid = uuid)
+    if users.count() is 0:
+        return jsonify({
+            'msg': 'user_not_exists',
+            'code': 206,
+        })
+    user = users.first()
+    like_videos = user.like_videos
+    for like_video in like_videos:
+        if like_video.a_id is video:
+            sel = like_video
+            user.like_videos.remove(sel)
+            db.session.commit()
+            return jsonify({
+                'msg': 'del_success',
+                'code': 200
+            })
+    return jsonify({
+        'msg': 'video_not_exists',
+        'code': 206,
+    })
 
 @main.route('/beacon/v2/add_play_history', methods = ['POST'])
 def add_play_history():
@@ -215,6 +257,25 @@ def get_play_history(uuid):
         'msg': 'get_all_histories',
         'code': 200,
         'data': res,
+    })
+
+@main.route('/beacon/v2/del_play_history', methods = ['POST'])
+def del_play_history():
+    uuid = request.json['uuid']
+    video = request.json['video_id']
+
+    sels = models.Histories.query.filter_by(user_id = uuid, video_id = video)
+    if sels.count() is 0:
+        return jsonify({
+            'msg': 'item_not_exists',
+            'code': 206,
+        })
+    sel = sels.first()
+    db.session.delete(sel)
+    db.session.commmit()
+    return jsonify({
+        'msg': 'del_success',
+        'code': 200,
     })
 
 @main.route('/beacon/v2/add_uuid/<uuid>', methods = ['GET'])
