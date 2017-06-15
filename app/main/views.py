@@ -202,7 +202,7 @@ def del_like_video():
     user = users.first()
     like_videos = user.like_videos
     for like_video in like_videos:
-        if like_video.a_id is video:
+        if str(like_video.a_id) == str(video):
             sel = like_video
             user.like_videos.remove(sel)
             db.session.commit()
@@ -271,8 +271,9 @@ def del_play_history():
             'code': 206,
         })
     sel = sels.first()
+    print(sel)
     db.session.delete(sel)
-    db.session.commmit()
+    db.session.commit()
     return jsonify({
         'msg': 'del_success',
         'code': 200,
