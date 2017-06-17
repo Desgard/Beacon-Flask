@@ -103,3 +103,8 @@ ENV/
 # pycharm
 .idea/
 migrations/
+
+# database
+*.db
+*.sqlite
+*.sqlite3
