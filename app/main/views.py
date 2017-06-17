@@ -252,7 +252,14 @@ def get_play_history(uuid):
     histories = models.Histories.query.order_by(desc(models.Histories.watch_date)).all()
     res = []
     for history in histories:
-        res.append(history.toDict())
+        video_id = history.video_id
+        search_res = models.Videos.query.filter_by(video_id = video_id)
+        item = dict()
+        if search_res.count() > 0 :
+            video = search_res[0]
+            item = video.toDict()
+        item["watch_date"] = history.watch_date
+        res.append(item)
     return jsonify({
         'msg': 'get_all_histories',
         'code': 200,
