@@ -105,6 +105,9 @@ class Videos(db.Model):
     def __repr__(self):
         return '<Video %r: %r>' % (self.video_id, self.title)
 
+    def __eq__(self, other):
+        return self.a_id == other.a_id
+
     def toDict(self):
         res = dict()
         res['id'] = self.video_id

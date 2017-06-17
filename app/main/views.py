@@ -163,7 +163,16 @@ def add_like_video():
             'code': 205,
         })
 
+    for lov in userItem.like_videos:
+        if vidoeItem == lov:
+            return jsonify({
+                'msg': 'it_is_like_video',
+                'code': 206,
+            })
+
     userItem.like_videos.append(vidoeItem)
+
+
     db.session.add(userItem)
     db.session.commit()
     return jsonify({
