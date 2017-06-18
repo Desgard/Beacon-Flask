@@ -10,6 +10,17 @@
 
 **Echo** 团队为 **[Beacon](https://github.com/SeaHub/Beacon)** 后端 API 实现代码。
 
+## 工程结构
+
+* _config.yml
+* app：主目录
+* config.py：配置文件
+* data.db：数据库文件
+* manage.py：flask-script 
+* migrations：数据库迁移目录
+* requirements.txt：Pypi 包配置
+* venv：virtualenv 环境
+
 ## 部署方式
 
 1. `clone` 项目
